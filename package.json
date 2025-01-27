@@ -20,14 +20,13 @@
   "exports": {
     ".": {
       "types": "./dist/src/y-tiptap.d.ts",
-      "import": "./src/y-tiptap.js",
+      "import": "./dist/y-tiptap.js",
       "require": "./dist/y-tiptap.cjs"
     }
   },
   "files": [
     "dist/*",
-    "!dist/test.*",
-    "src/*"
+    "!dist/test.*"
   ],
   "repository": {
     "type": "git",

@@ -16,12 +16,20 @@ const debugResolve = {
 
 export default [{
   input: './src/y-tiptap.js',
-  output: [{
-    name: 'Y',
-    file: 'dist/y-tiptap.cjs',
-    format: 'cjs',
-    sourcemap: true
-  }],
+  output: [
+    {
+      name: 'Y',
+      file: 'dist/y-tiptap.cjs',
+      format: 'cjs',
+      sourcemap: true
+    },
+    {
+      name: 'Y',
+      file: 'dist/y-tiptap.js',
+      format: 'es',
+      sourcemap: true
+    }
+  ],
   external: id => /^(lib0|y-protocols|prosemirror|yjs)/.test(id)
 }, {
   input: './tests/index.js',
