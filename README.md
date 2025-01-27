@@ -200,4 +200,4 @@ tr.setMeta("addToHistory", false);
 
 ### License
 
-[The MIT License](./LICENSE) © Kevin Jahns
+[The MIT License](./LICENSE) © Tiptap GmbH
