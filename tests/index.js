@@ -1,4 +1,4 @@
-import * as prosemirror from './y-prosemirror.test.js'
+import * as prosemirror from './y-tiptap.test.js'
 
 import { runTests } from 'lib0/testing'
 import { isBrowser, isNode } from 'lib0/environment'

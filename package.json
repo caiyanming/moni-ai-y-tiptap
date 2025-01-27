@@ -1,16 +1,12 @@
 {
-  "name": "y-prosemirror",
+  "name": "@tiptap/y-tiptap",
   "version": "1.2.15",
-  "description": "Prosemirror bindings for Yjs",
-  "main": "./dist/y-prosemirror.cjs",
-  "module": "./src/y-prosemirror.js",
+  "description": "Tiptap prosemirror bindings for Yjs",
+  "main": "./dist/y-tiptap.cjs",
+  "module": "./src/y-tiptap.js",
   "type": "module",
-  "types": "./dist/src/y-prosemirror.d.ts",
+  "types": "./dist/src/y-tiptap.d.ts",
   "sideEffects": false,
-  "funding": {
-    "type": "GitHub Sponsors ❤",
-    "url": "https://github.com/sponsors/dmonad"
-  },
   "scripts": {
     "clean": "rm -rf dist",
     "dist": "npm run clean && rollup -c && tsc",
@@ -23,9 +19,9 @@
   },
   "exports": {
     ".": {
-      "types": "./dist/src/y-prosemirror.d.ts",
-      "import": "./src/y-prosemirror.js",
-      "require": "./dist/y-prosemirror.cjs"
+      "types": "./dist/src/y-tiptap.d.ts",
+      "import": "./src/y-tiptap.js",
+      "require": "./dist/y-tiptap.cjs"
     }
   },
   "files": [
@@ -35,12 +31,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yjs/y-prosemirror.git"
+    "url": "git+https://github.com/ueberdosis/y-tiptap.git"
   },
   "keywords": [
     "Yjs"
   ],
-  "author": "Kevin Jahns <kevin.jahns@protonmail.com>",
   "license": "MIT",
   "standard": {
     "ignore": [
@@ -49,10 +44,6 @@
       "/docs"
     ]
   },
-  "bugs": {
-    "url": "https://github.com/yjs/y-prosemirror/issues"
-  },
-  "homepage": "https://github.com/yjs/y-prosemirror#readme",
   "dependencies": {
     "lib0": "^0.2.42"
   },

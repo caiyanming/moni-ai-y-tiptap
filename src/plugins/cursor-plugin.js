@@ -92,7 +92,7 @@ export const createDecorations = (
       if (user.color == null) {
         user.color = '#ffa500'
       } else if (!rxValidColor.test(user.color)) {
-        // We only support 6-digit RGB colors in y-prosemirror
+        // We only support 6-digit RGB colors in y-tiptap
         console.warn('A user uses an unsupported color format', user)
       }
       if (user.name == null) {

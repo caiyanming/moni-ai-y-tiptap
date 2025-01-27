@@ -1,6 +1,6 @@
-# y-prosemirror
+# y-tiptap
 
-> [ProseMirror](http://prosemirror.net/) Binding for [Yjs](https://github.com/yjs/yjs) - [Demo](https://demos.yjs.dev/prosemirror/prosemirror.html)
+> [Tiptap](http://tiptap.dev/) Binding for [Yjs](https://github.com/yjs/yjs)
 
 This binding maps a Y.XmlFragment to the ProseMirror state.
 
@@ -14,7 +14,7 @@ This binding maps a Y.XmlFragment to the ProseMirror state.
 ### Example
 
 ```js
-import { ySyncPlugin, yCursorPlugin, yUndoPlugin, undo, redo, initProseMirrorDoc } from 'y-prosemirror'
+import { ySyncPlugin, yCursorPlugin, yUndoPlugin, undo, redo, initProseMirrorDoc } from '@tiptap/y-tiptap'
 import { exampleSetup } from 'prosemirror-example-setup'
 import { keymap } from 'prosemirror-keymap'
 ..
@@ -39,8 +39,6 @@ const prosemirrorView = new EditorView(document.querySelector('#editor'), {
   })
 })
 ```
-
-Also look [here](https://github.com/yjs/yjs-demos/tree/master/prosemirror) for a working example.
 
 #### Remote Cursors
 
@@ -135,7 +133,7 @@ to a datastore or for importing existing documents.
 > to store the Y.Doc binary update format.
 
 ```js
-import { prosemirrorToYDoc } from 'y-prosemirror'
+import { prosemirrorToYDoc } from '@tiptap/y-tiptap'
 
 // Pass JSON previously output from Prosemirror
 const doc = Node.fromJSON(schema, {
@@ -149,7 +147,7 @@ Because JSON is a common usecase there is an equivalent method that skips the ne
 to create a Prosemirror Node.
 
 ```js
-import { prosemirrorJSONToYDoc } from 'y-prosemirror'
+import { prosemirrorJSONToYDoc } from '@tiptap/y-tiptap'
 
 // Pass JSON previously output from Prosemirror
 const ydoc = prosemirrorJSONToYDoc(schema, {
@@ -159,7 +157,7 @@ const ydoc = prosemirrorJSONToYDoc(schema, {
 ```
 
 ```js
-import { yDocToProsemirror } from 'y-prosemirror'
+import { yDocToProsemirror } from '@tiptap/y-tiptap'
 
 // apply binary updates from elsewhere
 const ydoc = new Y.Doc()
@@ -172,7 +170,7 @@ Because JSON is a common usecase there is an equivalent method that outputs JSON
 directly, this method does not require the Prosemirror schema.
 
 ```js
-import { yDocToProsemirrorJSON } from 'y-prosemirror'
+import { yDocToProsemirrorJSON } from '@tiptap/y-tiptap'
 
 // apply binary updates from elsewhere
 const ydoc = new Y.Doc()

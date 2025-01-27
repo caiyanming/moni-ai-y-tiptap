@@ -2,7 +2,7 @@
 
 import * as Y from 'yjs'
 import { WebrtcProvider } from 'y-webrtc'
-import { ySyncPlugin, yCursorPlugin, yUndoPlugin, undo, redo, initProseMirrorDoc } from '../src/y-prosemirror.js'
+import { ySyncPlugin, yCursorPlugin, yUndoPlugin, undo, redo, initProseMirrorDoc } from '../src/y-tiptap.js'
 import { EditorState } from 'prosemirror-state'
 import { EditorView } from 'prosemirror-view'
 import { schema } from './schema.js'

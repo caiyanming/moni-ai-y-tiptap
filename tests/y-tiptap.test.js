@@ -15,7 +15,7 @@ import {
   ySyncPluginKey,
   yUndoPlugin,
   yXmlFragmentToProsemirrorJSON
-} from '../src/y-prosemirror.js'
+} from '../src/y-tiptap.js'
 import { EditorState, Plugin, TextSelection } from 'prosemirror-state'
 import { EditorView } from 'prosemirror-view'
 import * as basicSchema from 'prosemirror-schema-basic'

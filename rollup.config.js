@@ -15,10 +15,10 @@ const debugResolve = {
 */
 
 export default [{
-  input: './src/y-prosemirror.js',
+  input: './src/y-tiptap.js',
   output: [{
     name: 'Y',
-    file: 'dist/y-prosemirror.cjs',
+    file: 'dist/y-tiptap.cjs',
     format: 'cjs',
     sourcemap: true
   }],
