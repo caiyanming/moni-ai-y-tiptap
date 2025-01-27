@@ -1,8 +1,8 @@
 import { updateYFragment, createNodeFromYElement, MarkPrefix } from './plugins/sync-plugin.js' // eslint-disable-line
 import { ySyncPluginKey } from './plugins/keys.js'
 import * as Y from 'yjs'
-import { EditorView } from 'prosemirror-view' // eslint-disable-line
-import { Node, Schema, Fragment } from 'prosemirror-model' // eslint-disable-line
+import { EditorView } from '@tiptap/pm/view' // eslint-disable-line
+import { Node, Schema, Fragment } from '@tiptap/pm/model' // eslint-disable-line
 import * as error from 'lib0/error'
 import * as map from 'lib0/map'
 import * as eventloop from 'lib0/eventloop'

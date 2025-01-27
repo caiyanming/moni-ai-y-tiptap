@@ -16,14 +16,14 @@ import {
   yUndoPlugin,
   yXmlFragmentToProsemirrorJSON
 } from '../src/y-tiptap.js'
-import { EditorState, Plugin, TextSelection } from 'prosemirror-state'
-import { EditorView } from 'prosemirror-view'
-import * as basicSchema from 'prosemirror-schema-basic'
-import { findWrapping } from 'prosemirror-transform'
+import { EditorState, Plugin, TextSelection } from '@tiptap/pm/state'
+import { EditorView } from '@tiptap/pm/view'
+import * as basicSchema from '@tiptap/pm/schema-basic'
+import { findWrapping } from '@tiptap/pm/transform'
 import { schema as complexSchema } from './complexSchema.js'
 import * as promise from 'lib0/promise'
 
-const schema = /** @type {import('prosemirror-model').Schema} */ (basicSchema.schema)
+const schema = /** @type {import('@tiptap/pm/model').Schema} */ (basicSchema.schema)
 
 /**
  * Verify that update events in plugins are only fired once.

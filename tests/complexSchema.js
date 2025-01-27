@@ -1,4 +1,4 @@
-import { Schema } from 'prosemirror-model'
+import { Schema } from '@tiptap/pm/model'
 
 const brDOM = ['br']
 

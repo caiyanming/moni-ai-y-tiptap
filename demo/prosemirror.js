@@ -3,11 +3,11 @@
 import * as Y from 'yjs'
 import { WebrtcProvider } from 'y-webrtc'
 import { ySyncPlugin, yCursorPlugin, yUndoPlugin, undo, redo, initProseMirrorDoc } from '../src/y-tiptap.js'
-import { EditorState } from 'prosemirror-state'
-import { EditorView } from 'prosemirror-view'
+import { EditorState } from '@tiptap/pm/state'
+import { EditorView } from '@tiptap/pm/view'
 import { schema } from './schema.js'
 import { exampleSetup } from 'prosemirror-example-setup'
-import { keymap } from 'prosemirror-keymap'
+import { keymap } from '@tiptap/pm/keymap'
 
 window.addEventListener('load', () => {
   const ydoc = new Y.Doc()

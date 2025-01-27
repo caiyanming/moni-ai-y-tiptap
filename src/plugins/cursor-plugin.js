@@ -1,6 +1,6 @@
 import * as Y from 'yjs'
-import { Decoration, DecorationSet } from "prosemirror-view"; // eslint-disable-line
-import { Plugin } from "prosemirror-state"; // eslint-disable-line
+import { Decoration, DecorationSet } from "@tiptap/pm/view"; // eslint-disable-line
+import { Plugin } from "@tiptap/pm/state"; // eslint-disable-line
 import { Awareness } from "y-protocols/awareness"; // eslint-disable-line
 import {
   absolutePositionToRelativePosition,
@@ -46,7 +46,7 @@ export const defaultCursorBuilder = (user) => {
  * Default generator for the selection attributes
  *
  * @param {any} user user data
- * @return {import('prosemirror-view').DecorationAttrs}
+ * @return {import('@tiptap/pm/view').DecorationAttrs}
  */
 export const defaultSelectionBuilder = (user) => {
   return {
@@ -62,7 +62,7 @@ const rxValidColor = /^#[0-9a-fA-F]{6}$/
  * @param {Awareness} awareness
  * @param {function(number, number, any):boolean} awarenessFilter
  * @param {function({ name: string, color: string }):Element} createCursor
- * @param {function({ name: string, color: string }):import('prosemirror-view').DecorationAttrs} createSelection
+ * @param {function({ name: string, color: string }):import('@tiptap/pm/view').DecorationAttrs} createSelection
  * @return {any} DecorationSet
  */
 export const createDecorations = (
@@ -143,7 +143,7 @@ export const createDecorations = (
  * @param {object} opts
  * @param {function(any, any, any):boolean} [opts.awarenessStateFilter]
  * @param {function(any):HTMLElement} [opts.cursorBuilder]
- * @param {function(any):import('prosemirror-view').DecorationAttrs} [opts.selectionBuilder]
+ * @param {function(any):import('@tiptap/pm/view').DecorationAttrs} [opts.selectionBuilder]
  * @param {function(any):any} [opts.getSelection]
  * @param {string} [cursorStateField] By default all editor bindings use the awareness 'cursor' field to propagate cursor information.
  * @return {any}

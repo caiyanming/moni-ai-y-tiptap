@@ -3,8 +3,8 @@
  */
 
 import { createMutex } from 'lib0/mutex'
-import * as PModel from 'prosemirror-model'
-import { Plugin, TextSelection } from "prosemirror-state"; // eslint-disable-line
+import * as PModel from '@tiptap/pm/model'
+import { Plugin, TextSelection } from "@tiptap/pm/state"; // eslint-disable-line
 import * as math from 'lib0/math'
 import * as set from 'lib0/set'
 import { simpleDiff } from 'lib0/diff'

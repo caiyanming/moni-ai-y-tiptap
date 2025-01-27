@@ -1,4 +1,4 @@
-import { PluginKey } from 'prosemirror-state' // eslint-disable-line
+import { PluginKey } from '@tiptap/pm/state' // eslint-disable-line
 
 /**
  * The unique prosemirror plugin key for syncPlugin
