@@ -1,8 +1,8 @@
-import { updateYFragment, createNodeFromYElement, MarkPrefix } from './plugins/sync-plugin.js' // eslint-disable-line
+import { updateYFragment, createNodeFromYElement, yattr2markname, createEmptyMeta } from './plugins/sync-plugin.js' // eslint-disable-line
 import { ySyncPluginKey } from './plugins/keys.js'
 import * as Y from 'yjs'
-import { EditorView } from '@tiptap/pm/view' // eslint-disable-line
-import { Node, Schema, Fragment } from '@tiptap/pm/model' // eslint-disable-line
+import { EditorView } from 'prosemirror-view' // eslint-disable-line
+import { Node, Schema, Fragment } from 'prosemirror-model' // eslint-disable-line
 import * as error from 'lib0/error'
 import * as map from 'lib0/map'
 import * as eventloop from 'lib0/eventloop'
@@ -202,7 +202,7 @@ export const yXmlFragmentToProseMirrorFragment = (yXmlFragment, schema) => {
     createNodeFromYElement(
       /** @type {Y.XmlElement} */ (t),
       schema,
-      new Map()
+      createEmptyMeta()
     )
   ).filter((n) => n !== null)
   return Fragment.fromArray(fragmentContent)
@@ -223,21 +223,20 @@ export const yXmlFragmentToProseMirrorRootNode = (yXmlFragment, schema) =>
  *
  * @param {Y.XmlFragment} yXmlFragment
  * @param {Schema} schema
+ *
+ * @todo deprecate mapping property
  */
 export const initProseMirrorDoc = (yXmlFragment, schema) => {
-  /**
-   * @type {ProsemirrorMapping}
-   */
-  const mapping = new Map()
+  const meta = createEmptyMeta()
   const fragmentContent = yXmlFragment.toArray().map((t) =>
     createNodeFromYElement(
       /** @type {Y.XmlElement} */ (t),
       schema,
-      mapping
+      meta
     )
   ).filter((n) => n !== null)
   const doc = schema.topNodeType.create(null, Fragment.fromArray(fragmentContent))
-  return { doc, mapping }
+  return { doc, meta, mapping: meta.mapping }
 }
 
 /**
@@ -280,7 +279,7 @@ export function prosemirrorToYDoc (doc, xmlFragment = 'prosemirror') {
 export function prosemirrorToYXmlFragment (doc, xmlFragment) {
   const type = xmlFragment || new Y.XmlFragment()
   const ydoc = type.doc ? type.doc : { transact: (transaction) => transaction(undefined) }
-  updateYFragment(ydoc, type, doc, new Map())
+  updateYFragment(ydoc, type, doc, { mapping: new Map(), isOMark: new Map() })
   return type
 }
 
@@ -376,7 +375,10 @@ export function yDocToProsemirrorJSON (
 export function yXmlFragmentToProsemirrorJSON (xmlFragment) {
   const items = xmlFragment.toArray()
 
-  function serialize (item) {
+  /**
+   * @param {Y.AbstractType} item
+   */
+  const serialize = item => {
     /**
      * @type {Object} NodeObject
      * @property {string} NodeObject.type
@@ -386,75 +388,45 @@ export function yXmlFragmentToProsemirrorJSON (xmlFragment) {
     let response
 
     // TODO: Must be a better way to detect text nodes than this
-    if (!item.nodeName) {
+    if (item instanceof Y.XmlText) {
       const delta = item.toDelta()
-      response = delta.map((d) => {
+      response = delta.map(/** @param {any} d */ (d) => {
         const text = {
           type: 'text',
           text: d.insert
         }
-
         if (d.attributes) {
-          const marks = []
-
-          Object.keys(d.attributes).forEach((type) => {
-            const attrs = d.attributes[type]
-            if (Array.isArray(attrs)) {
-              // multiple marks of same type
-              attrs.forEach(singleAttrs => {
-                const mark = {
-                  type
-                }
-
-                if (Object.keys(singleAttrs)) {
-                  mark.attrs = singleAttrs
-                }
-
-                marks.push(mark)
-              })
-            } else {
-              const mark = {
-                type
-              }
-
-              if (Object.keys(attrs)) {
-                mark.attrs = attrs
-              }
-
-              marks.push(mark)
+          text.marks = Object.keys(d.attributes).map((type_) => {
+            const attrs = d.attributes[type_]
+            const type = yattr2markname(type_)
+            const mark = {
+              type
             }
+            if (Object.keys(attrs)) {
+              mark.attrs = attrs
+            }
+            return mark
           })
-
-          text.marks = marks
         }
         return text
       })
-    } else {
+    } else if (item instanceof Y.XmlElement) {
       response = {
         type: item.nodeName
       }
 
       const attrs = item.getAttributes()
-
-      // Add all non-mark attributes to the element
-      for (const key of Object.keys(attrs).filter((key) => !key.startsWith(MarkPrefix))) {
-        if (!response.attrs) response.attrs = {}
-        response.attrs[key] = attrs[key]
-      }
-
-      // Check whether the attrs contains marks, if so, add them to the response
-      if (Object.keys(attrs).some((key) => key.startsWith(MarkPrefix))) {
-        response.marks = Object.keys(attrs)
-          .filter((key) => key.startsWith(MarkPrefix))
-          .map((key) => {
-            return attrs[key]
-          })
+      if (Object.keys(attrs).length) {
+        response.attrs = attrs
       }
 
       const children = item.toArray()
       if (children.length) {
         response.content = children.map(serialize).flat()
       }
+    } else {
+      // expected either Y.XmlElement or Y.XmlText
+      error.unexpectedCase()
     }
 
     return response

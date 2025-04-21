@@ -16,11 +16,12 @@ const calcYchangeDomAttrs = (attrs, domAttrs = {}) => {
 export const nodes = {
   // :: NodeSpec The top level document node.
   doc: {
-    content: 'custom paragraph'
+    content: 'block+'
   },
 
   custom: {
     atom: true,
+    group: 'block',
     attrs: { checked: { default: false } },
     parseDOM: [{ tag: 'div' }],
     toDOM () {
@@ -157,7 +158,6 @@ export const nodes = {
 const emDOM = ['em', 0]
 const strongDOM = ['strong', 0]
 const codeDOM = ['code', 0]
-const commentDOM = ['span', 0]
 
 // :: Object [Specs](#model.MarkSpec) for the marks in the schema.
 export const marks = {
@@ -225,17 +225,6 @@ export const marks = {
     }
   },
 
-  comment: {
-    attrs: {
-      id: { default: null }
-    },
-    exclude: '', // allow multiple "comments" marks to overlap
-    parseDOM: [{ tag: 'span' }],
-    toDOM () {
-      return commentDOM
-    }
-  },
-
   ychange: {
     attrs: {
       user: { default: null },
@@ -245,6 +234,17 @@ export const marks = {
     parseDOM: [{ tag: 'ychange' }],
     toDOM (node) {
       return ['ychange', { ychange_user: node.attrs.user, ychange_type: node.attrs.type }]
+    }
+  },
+
+  comment: {
+    attrs: {
+      id: { default: null }
+    },
+    excludes: '',
+    parseDOM: [{ tag: 'comment' }],
+    toDOM (node) {
+      return ['comment', { comment_id: node.attrs.id }]
     }
   }
 }

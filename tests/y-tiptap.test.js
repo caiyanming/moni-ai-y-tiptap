@@ -16,14 +16,29 @@ import {
   yUndoPlugin,
   yXmlFragmentToProsemirrorJSON
 } from '../src/y-tiptap.js'
-import { EditorState, Plugin, TextSelection } from '@tiptap/pm/state'
-import { EditorView } from '@tiptap/pm/view'
-import * as basicSchema from '@tiptap/pm/schema-basic'
-import { findWrapping } from '@tiptap/pm/transform'
+import { EditorState, Plugin, TextSelection } from 'prosemirror-state'
+import { EditorView } from 'prosemirror-view'
+import { Schema } from 'prosemirror-model'
+import * as basicSchema from 'prosemirror-schema-basic'
+import { findWrapping } from 'prosemirror-transform'
 import { schema as complexSchema } from './complexSchema.js'
 import * as promise from 'lib0/promise'
 
-const schema = /** @type {import('@tiptap/pm/model').Schema} */ (basicSchema.schema)
+const schema = new Schema({
+  nodes: basicSchema.nodes,
+  marks: Object.assign({}, basicSchema.marks, {
+    comment: {
+      attrs: {
+        id: { default: null }
+      },
+      excludes: '',
+      parseDOM: [{ tag: 'comment' }],
+      toDOM (node) {
+        return ['comment', { comment_id: node.attrs.id }]
+      }
+    }
+  })
+})
 
 /**
  * Verify that update events in plugins are only fired once.
@@ -78,6 +93,46 @@ export const testPluginIntegrity = (_tc) => {
     viewUpdateEvents: 1,
     stateUpdateEvents: 2 // fired twice, because the ySyncPlugin adds additional fields to state after the initial render
   }, 'events are fired only once')
+}
+
+/**
+ * @param {t.TestCase} tc
+ */
+export const testOverlappingMarks = (_tc) => {
+  const view = new EditorView(null, {
+    state: EditorState.create({
+      schema,
+      plugins: []
+    })
+  })
+  view.dispatch(
+    view.state.tr.insert(
+      0,
+      schema.node(
+        'paragraph',
+        undefined,
+        schema.text('hello world')
+      )
+    )
+  )
+
+  view.dispatch(
+    view.state.tr.addMark(1, 3, schema.mark('comment', { id: 4 }))
+  )
+  view.dispatch(
+    view.state.tr.addMark(2, 4, schema.mark('comment', { id: 5 }))
+  )
+  const stateJSON = JSON.parse(JSON.stringify(view.state.doc.toJSON()))
+  // attrs.ychange is only available with a schema
+  delete stateJSON.content[0].attrs
+  const back = prosemirrorJSONToYDoc(/** @type {any} */ (schema), stateJSON)
+  // test if transforming back and forth from Yjs doc works
+  const backandforth = JSON.parse(JSON.stringify(yDocToProsemirrorJSON(back)))
+  t.compare(stateJSON, backandforth)
+
+  // re-assure that we have overlapping comments
+  const expected = '[{"type":"text","marks":[{"type":"comment","attrs":{"id":4}}],"text":"h"},{"type":"text","marks":[{"type":"comment","attrs":{"id":4}},{"type":"comment","attrs":{"id":5}}],"text":"e"},{"type":"text","marks":[{"type":"comment","attrs":{"id":5}}],"text":"l"},{"type":"text","text":"lo world"}]'
+  t.compare(backandforth.content[0].content, JSON.parse(expected))
 }
 
 /**
@@ -173,7 +228,7 @@ export const testEmptyNotSync = (_tc) => {
   )
   t.compareStrings(
     type.toString(),
-    '<custom checked="true"></custom><paragraph></paragraph>'
+    '<custom checked="true"></custom>'
   )
 }
 
@@ -334,8 +389,8 @@ export const testInitialCursorPosition2 = async (_tc) => {
   p.insert(0, [new Y.XmlText('hello world!')])
   yxml.insert(0, [p])
   console.log('anchor', view.state.selection.anchor)
-  t.assert(view.state.selection.anchor === 0)
-  t.assert(view.state.selection.head === 0)
+  t.assert(view.state.selection.anchor === 1)
+  t.assert(view.state.selection.head === 1)
 }
 
 export const testVersioning = async (_tc) => {
@@ -361,7 +416,7 @@ export const testVersioning = async (_tc) => {
   await promise.wait(50)
   console.log('calculated diff via snapshots: ', view.state.doc.toJSON())
   // recreate the JSON, because ProseMirror messes with the constructors
-  const viewstate1 = JSON.parse(JSON.stringify(view.state.doc.toJSON().content[1].content))
+  const viewstate1 = JSON.parse(JSON.stringify(view.state.doc.toJSON().content[0].content))
   const expectedState = [{
     type: 'text',
     marks: [{ type: 'ychange', attrs: { user: 'me', type: 'removed' } }],
@@ -379,9 +434,42 @@ export const testVersioning = async (_tc) => {
   )
   await promise.wait(50)
 
-  const viewstate2 = JSON.parse(JSON.stringify(view.state.doc.toJSON().content[1].content))
+  const viewstate2 = JSON.parse(JSON.stringify(view.state.doc.toJSON().content[0].content))
   console.log('calculated diff via updates: ', JSON.stringify(viewstate2))
   t.compare(viewstate2, expectedState)
+}
+
+export const testVersioningWithGarbageCollection = async (_tc) => {
+  const ydoc = new Y.Doc()
+  const yxml = ydoc.get('prosemirror', Y.XmlFragment)
+  const permanentUserData = new Y.PermanentUserData(ydoc)
+  permanentUserData.setUserMapping(ydoc, ydoc.clientID, 'me')
+  console.log('yxml', yxml.toString())
+  const view = createNewComplexProsemirrorView(ydoc)
+  const p = new Y.XmlElement('paragraph')
+  const ytext = new Y.XmlText('hello world!')
+  p.insert(0, [ytext])
+  yxml.insert(0, [p])
+  const snapshotDoc1 = Y.encodeStateAsUpdateV2(ydoc)
+  ytext.delete(0, 6)
+  const snapshotDoc2 = Y.encodeStateAsUpdateV2(ydoc)
+  view.dispatch(
+    view.state.tr.setMeta(ySyncPluginKey, { snapshot: snapshotDoc2, prevSnapshot: snapshotDoc1, permanentUserData })
+  )
+  await promise.wait(50)
+  console.log('calculated diff via snapshots: ', view.state.doc.toJSON())
+  // recreate the JSON, because ProseMirror messes with the constructors
+  const viewstate1 = JSON.parse(JSON.stringify(view.state.doc.toJSON().content[0].content))
+  const expectedState = [{
+    type: 'text',
+    marks: [{ type: 'ychange', attrs: { user: 'me', type: 'removed' } }],
+    text: 'hello '
+  }, {
+    type: 'text',
+    text: 'world!'
+  }]
+  console.log('calculated diff via snapshots: ', JSON.stringify(viewstate1))
+  t.compare(viewstate1, expectedState)
 }
 
 export const testAddToHistoryIgnore = (_tc) => {
@@ -452,69 +540,6 @@ export const testAddToHistoryIgnore = (_tc) => {
   )
 }
 
-/**
- * @param {t.TestCase} tc
- */
-export const testAddMarkToNode = (_tc) => {
-  const view = createNewProsemirrorView(new Y.Doc())
-  view.dispatch(
-    view.state.tr.insert(
-      0,
-      /** @type {any} */ (schema.node('image', { src: 'http://example.com', alt: null, title: null }, [], [schema.mark('link', { href: 'https://yjs.dev', title: null })]))
-    )
-  )
-  // convert to JSON and back because the ProseMirror schema messes with the constructors
-  const stateJSON = JSON.parse(JSON.stringify(view.state.doc.toJSON()))
-  // test if transforming back and forth from yXmlFragment works
-  const xml = new Y.XmlFragment()
-  prosemirrorJSONToYXmlFragment(/** @type {any} */ (schema), stateJSON, xml)
-  const doc = new Y.Doc()
-  doc.getMap('root').set('firstDoc', xml)
-  // test if transforming back and forth from Yjs doc works
-  const backandforth = JSON.parse(JSON.stringify(yXmlFragmentToProsemirrorJSON(xml)))
-  // Add the missing alt and title attributes, these are defaults for the image mark
-  backandforth.content[0].content[0].attrs.alt = null
-  backandforth.content[0].content[0].attrs.title = null
-
-  t.assert(backandforth.content[0].content[0].marks.length === 1, 'node has one mark')
-  t.compare(stateJSON, backandforth, 'marks on nodes are preserved')
-}
-
-/**
- * @param {t.TestCase} tc
- */
-export const testRemoveMarkFromNode = (_tc) => {
-  const view = createNewProsemirrorView(new Y.Doc())
-  view.dispatch(
-    view.state.tr.insert(
-      0,
-      /** @type {any} */ (schema.node('image', { src: 'http://example.com', alt: null, title: null }, [], [schema.mark('link', { href: 'https://yjs.dev', title: null })]))
-    )
-  )
-  t.assert(view.state.doc.content.firstChild.content.firstChild.marks.length === 1, 'node has one mark')
-
-  view.dispatch(
-    view.state.tr.removeNodeMark(1, schema.marks.link)
-  )
-  t.assert(view.state.doc.content.firstChild.content.firstChild.marks.length === 0, 'node has no marks')
-  // convert to JSON and back because the ProseMirror schema messes with the constructors
-  const stateJSON = JSON.parse(JSON.stringify(view.state.doc.toJSON()))
-  // test if transforming back and forth from yXmlFragment works
-  const xml = new Y.XmlFragment()
-  prosemirrorJSONToYXmlFragment(/** @type {any} */ (schema), stateJSON, xml)
-  const doc = new Y.Doc()
-  doc.getMap('root').set('firstDoc', xml)
-
-  // test if transforming back and forth from Yjs doc works
-  const backandforth = JSON.parse(JSON.stringify(yXmlFragmentToProsemirrorJSON(xml)))
-  // Add the missing alt and title attributes, these are defaults for the image mark
-  backandforth.content[0].content[0].attrs.alt = null
-  backandforth.content[0].content[0].attrs.title = null
-
-  t.assert(backandforth.content[0].content[0].marks === undefined, 'node has no marks')
-  t.compare(stateJSON, backandforth)
-}
-
 const createNewProsemirrorViewWithSchema = (y, schema, undoManager = false) => {
   const view = new EditorView(null, {
     // @ts-ignore
@@ -541,6 +566,8 @@ let charCounter = 0
 
 const marksChoices = [
   [schema.mark('strong')],
+  [schema.mark('comment', { id: 1 })],
+  [schema.mark('comment', { id: 2 })],
   [schema.mark('em')],
   [schema.mark('em'), schema.mark('strong')],
   [],
@@ -572,6 +599,20 @@ const pmChanges = [
       2
     )
     p.dispatch(p.state.tr.insertText('', insertPos, insertPos + overwrite))
+  },
+  /**
+   * @param {Y.Doc} y
+   * @param {prng.PRNG} gen
+   * @param {EditorView} p
+   */
+  (_y, gen, p) => { // format text
+    const insertPos = prng.int32(gen, 0, p.state.doc.content.size)
+    const formatLen = math.min(
+      prng.int32(gen, 0, p.state.doc.content.size - insertPos),
+      2
+    )
+    const mark = prng.oneOf(gen, marksChoices.filter(choice => choice.length > 0))[0]
+    p.dispatch(p.state.tr.addMark(insertPos, insertPos + formatLen, mark))
   },
   /**
    * @param {Y.Doc} y
@@ -702,37 +743,3 @@ export const testRepeatGenerateProsemirrorChanges300 = tc => {
   checkResult(applyRandomTests(tc, pmChanges, 300, createNewProsemirrorView))
 }
 */
-
-/**
- * @param {t.TestCase} tc
- */
-export const testDuplicateMarks = tc => {
-  const ydoc = new Y.Doc()
-  const type = ydoc.getXmlFragment('prosemirror')
-  const view = createNewComplexProsemirrorView(ydoc)
-  t.assert(type.toString() === '', 'should only sync after first change')
-
-  view.dispatch(
-    view.state.tr.setNodeMarkup(0, undefined, {
-      checked: true
-    })
-  )
-
-  const marks = [complexSchema.mark('comment', { id: 0 }), complexSchema.mark('comment', { id: 1 })]
-  view.dispatch(view.state.tr.insert(view.state.doc.content.size - 1, /** @type {any} */ complexSchema.text('hello world', marks)))
-  const stateJSON = JSON.parse(JSON.stringify(view.state.doc.toJSON()))
-
-  // remove the attrs, because ychange is setting a default value
-  delete stateJSON.content[1].attrs
-
-  // test if transforming back and forth from Yjs doc works
-  const backandforth = JSON.parse(JSON.stringify(yDocToProsemirrorJSON(prosemirrorJSONToYDoc(/** @type {any} */ (complexSchema), stateJSON))))
-
-  console.dir(stateJSON, { depth: null })
-  console.dir(backandforth, { depth: null })
-
-  t.compare(stateJSON, backandforth)
-
-  // TODO: create a toString test, this currently fails because YXmlText breaks
-  // t.compareStrings(type.toString(), '<custom checked="true"></custom><paragraph></paragraph>')
-}

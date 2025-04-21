@@ -1,6 +1,6 @@
 import * as Y from 'yjs'
-import { Decoration, DecorationSet } from "@tiptap/pm/view"; // eslint-disable-line
-import { Plugin } from "@tiptap/pm/state"; // eslint-disable-line
+import { Decoration, DecorationSet } from "prosemirror-view"; // eslint-disable-line
+import { Plugin } from "prosemirror-state"; // eslint-disable-line
 import { Awareness } from "y-protocols/awareness"; // eslint-disable-line
 import {
   absolutePositionToRelativePosition,
@@ -46,7 +46,7 @@ export const defaultCursorBuilder = (user) => {
  * Default generator for the selection attributes
  *
  * @param {any} user user data
- * @return {import('@tiptap/pm/view').DecorationAttrs}
+ * @return {import('prosemirror-view').DecorationAttrs}
  */
 export const defaultSelectionBuilder = (user) => {
   return {
@@ -61,8 +61,8 @@ const rxValidColor = /^#[0-9a-fA-F]{6}$/
  * @param {any} state
  * @param {Awareness} awareness
  * @param {function(number, number, any):boolean} awarenessFilter
- * @param {function({ name: string, color: string }):Element} createCursor
- * @param {function({ name: string, color: string }):import('@tiptap/pm/view').DecorationAttrs} createSelection
+ * @param {(user: { name: string, color: string }, clientId: number) => Element} createCursor
+ * @param {(user: { name: string, color: string }, clientId: number) => import('prosemirror-view').DecorationAttrs} createSelection
  * @return {any} DecorationSet
  */
 export const createDecorations = (
@@ -92,7 +92,7 @@ export const createDecorations = (
       if (user.color == null) {
         user.color = '#ffa500'
       } else if (!rxValidColor.test(user.color)) {
-        // We only support 6-digit RGB colors in y-tiptap
+        // We only support 6-digit RGB colors in y-prosemirror
         console.warn('A user uses an unsupported color format', user)
       }
       if (user.name == null) {
@@ -115,7 +115,7 @@ export const createDecorations = (
         anchor = math.min(anchor, maxsize)
         head = math.min(head, maxsize)
         decorations.push(
-          Decoration.widget(head, () => createCursor(user), {
+          Decoration.widget(head, () => createCursor(user, clientId), {
             key: clientId + '',
             side: 10
           })
@@ -123,7 +123,7 @@ export const createDecorations = (
         const from = math.min(anchor, head)
         const to = math.max(anchor, head)
         decorations.push(
-          Decoration.inline(from, to, createSelection(user), {
+          Decoration.inline(from, to, createSelection(user, clientId), {
             inclusiveEnd: true,
             inclusiveStart: false
           })
@@ -142,8 +142,8 @@ export const createDecorations = (
  * @param {Awareness} awareness
  * @param {object} opts
  * @param {function(any, any, any):boolean} [opts.awarenessStateFilter]
- * @param {function(any):HTMLElement} [opts.cursorBuilder]
- * @param {function(any):import('@tiptap/pm/view').DecorationAttrs} [opts.selectionBuilder]
+ * @param {(user: any, clientId: number) => HTMLElement} [opts.cursorBuilder]
+ * @param {(user: any, clientId: number) => import('prosemirror-view').DecorationAttrs} [opts.selectionBuilder]
  * @param {function(any):any} [opts.getSelection]
  * @param {string} [cursorStateField] By default all editor bindings use the awareness 'cursor' field to propagate cursor information.
  * @return {any}

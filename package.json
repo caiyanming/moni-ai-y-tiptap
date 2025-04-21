@@ -44,7 +44,7 @@
     ]
   },
   "dependencies": {
-    "lib0": "^0.2.42"
+    "lib0": "^0.2.100"
   },
   "peerDependencies": {
     "@tiptap/pm": "^2.11.3",
