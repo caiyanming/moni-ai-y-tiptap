@@ -16,7 +16,7 @@ This binding maps a Y.XmlFragment to the ProseMirror state.
 ```js
 import { ySyncPlugin, yCursorPlugin, yUndoPlugin, undo, redo, initProseMirrorDoc } from '@tiptap/y-tiptap'
 import { exampleSetup } from 'prosemirror-example-setup'
-import { keymap } from '@tiptap/pm/keymap'
+import { keymap } from 'prosemirror-keymap'
 ..
 
 const type = ydocument.get('prosemirror', Y.XmlFragment)
