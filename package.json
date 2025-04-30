@@ -1,6 +1,6 @@
 {
   "name": "@tiptap/y-tiptap",
-  "version": "2.0.0-beta.1",
+  "version": "2.0.0-beta.5",
   "description": "Tiptap prosemirror bindings for Yjs",
   "main": "./dist/y-tiptap.cjs",
   "module": "./src/y-tiptap.js",
