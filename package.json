@@ -15,8 +15,8 @@
     "watch": "rollup -wc",
     "debug": "concurrently '0serve -o test.html' 'npm run watch'",
     "preversion": "npm run lint && npm run dist && npm run test",
-    "publish": "npm publish --access public",
-    "publish:pre": "npm publish --access public --tag next",
+    "publish": "npm run preversion && npm publish --access public",
+    "publish:pre": "npm run preversion && npm publish --access public --tag next",
     "start": "concurrently '0serve -o demo/prosemirror.html' 'npm run watch'"
   },
   "exports": {
