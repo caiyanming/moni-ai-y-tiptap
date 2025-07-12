@@ -1,4 +1,4 @@
-import { Plugin } from '@tiptap/pm/state' // eslint-disable-line
+import { Plugin } from 'prosemirror-state' // eslint-disable-line
 
 import { getRelativeSelection } from './sync-plugin.js'
 import { UndoManager, Item, ContentType, XmlElement, Text } from 'yjs'

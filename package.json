@@ -1,6 +1,6 @@
 {
   "name": "@tiptap/y-tiptap",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Tiptap prosemirror bindings for Yjs",
   "main": "./dist/y-tiptap.cjs",
   "module": "./src/y-tiptap.js",
@@ -49,7 +49,9 @@
     "lib0": "^0.2.100"
   },
   "peerDependencies": {
-    "@tiptap/pm": "3.0.0-beta.3",
+    "prosemirror-model": "^1.7.1",
+    "prosemirror-state": "^1.2.3",
+    "prosemirror-view": "^1.9.10",
     "y-protocols": "^1.0.1",
     "yjs": "^13.5.38"
   },
@@ -60,7 +62,11 @@
     "http-server": "^0.12.3",
     "jsdom": "^15.1.1",
     "prosemirror-example-setup": "^1.2.1",
-    "@tiptap/pm": "3.0.0-beta.3",
+    "prosemirror-model": "^1.18.1",
+    "prosemirror-schema-basic": "^1.2.0",
+    "prosemirror-state": "^1.4.1",
+    "prosemirror-transform": "^1.6.0",
+    "prosemirror-view": "^1.26.2",
     "rollup": "^2.59.0",
     "standard": "^17.0.0",
     "typescript": "^5.4.5",
