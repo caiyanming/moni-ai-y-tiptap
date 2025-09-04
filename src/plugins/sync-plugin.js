@@ -961,7 +961,7 @@ const equalYTextPText = (ytext, ptexts) => {
       d.insert === /** @type {any} */ (ptexts[i]).text &&
       object.keys(d.attributes || {}).length === ptexts[i].marks.length &&
       object.every(d.attributes, (attr, yattrname) => {
-        const markname = yattr2markname(yattrname)
+        const markname = yattr2markname(String(yattrname))
         const pmarks = ptexts[i].marks
         return equalAttrs(attr, pmarks.find(/** @param {any} mark */ mark => mark.type.name === markname)?.attrs)
       })

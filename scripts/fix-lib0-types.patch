@@ -1,0 +1,11 @@
+--- a/node_modules/.pnpm/lib0@0.2.114/node_modules/lib0/diff.d.ts
++++ b/node_modules/.pnpm/lib0@0.2.114/node_modules/lib0/diff.d.ts
+@@ -18,7 +18,7 @@
+  * a === b // values match
+  * ```
+  */
+-export type SimpleDiff<T extends string> = {
++export type SimpleDiff<T = any> = {
+     /**
+      * The index where changes were applied
+      */

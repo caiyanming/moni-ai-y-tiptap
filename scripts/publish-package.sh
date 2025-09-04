@@ -74,23 +74,43 @@ if [[ ! -d "dist" ]]; then
     exit 1
 fi
 
-# 尝试 unpublish (如果包已存在)
+# 强制清理已存在的版本 (使用scope配置自动路由)
 log_info "检查并清理已存在的版本: $PACKAGE_NAME@$VERSION"
-npm unpublish "$PACKAGE_NAME@$VERSION" --registry="$REGISTRY_URL" 2>/dev/null || true
-
-# 发布包
-log_info "发布包: $PACKAGE_NAME@$VERSION"
-if npm publish --registry="$REGISTRY_URL"; then
-    log_success "发布成功: $PACKAGE_NAME@$VERSION"
+if npm view "$PACKAGE_NAME@$VERSION" > /dev/null 2>&1; then
+    log_warning "发现已存在的包版本，正在删除..."
+    if npm unpublish "$PACKAGE_NAME@$VERSION" --force; then
+        log_success "成功删除已存在的版本"
+    else
+        log_error "删除已存在版本失败，尝试继续发布..."
+    fi
 else
-    log_error "发布失败: $PACKAGE_NAME@$VERSION"
-    exit 1
+    log_info "未发现已存在的版本"
 fi
 
-# 验证发布
+# 发布包 (使用scope配置自动路由到正确registry)
+log_info "发布包: $PACKAGE_NAME@$VERSION"
+# 检查是否为预发布版本（包含 beta, alpha, rc 等）
+if [[ "$VERSION" =~ (beta|alpha|rc) ]]; then
+    log_info "检测到预发布版本，使用 --tag beta"
+    if npm publish --tag beta --ignore-scripts; then
+        log_success "发布成功: $PACKAGE_NAME@$VERSION"
+    else
+        log_error "发布失败: $PACKAGE_NAME@$VERSION"
+        exit 1
+    fi
+else
+    if npm publish --ignore-scripts; then
+        log_success "发布成功: $PACKAGE_NAME@$VERSION"
+    else
+        log_error "发布失败: $PACKAGE_NAME@$VERSION"
+        exit 1
+    fi
+fi
+
+# 验证发布 (使用scope配置自动路由)
 log_info "验证发布结果..."
 sleep 2
-if npm view "$PACKAGE_NAME@$VERSION" --registry="$REGISTRY_URL" > /dev/null 2>&1; then
+if npm view "$PACKAGE_NAME@$VERSION" > /dev/null 2>&1; then
     log_success "验证成功: 包已成功发布到 registry"
 else
     log_error "验证失败: 无法在 registry 中找到发布的包"
@@ -101,7 +121,10 @@ echo ""
 log_success "y-tiptap fork 包发布完成!"
 echo ""
 log_info "验证命令:"
-echo "npm view $PACKAGE_NAME@$VERSION --registry=$REGISTRY_URL"
+echo "npm view $PACKAGE_NAME@$VERSION"
 echo ""
 log_info "在其他项目中安装:"
-echo "npm install $PACKAGE_NAME@$VERSION --registry=$REGISTRY_URL"
+echo "npm install $PACKAGE_NAME@$VERSION"
+echo ""
+log_info "Registry配置 (.npmrc):"
+echo "@tiptap:registry=http://registry.fufenxi.com:4873/"

@@ -17,7 +17,8 @@
     "preversion": "npm run lint && npm run dist && npm run test",
     "publish": "npm run preversion && npm publish --access public",
     "publish:pre": "npm run preversion && npm publish --access public --tag beta",
-    "start": "concurrently '0serve -o demo/prosemirror.html' 'npm run watch'"
+    "start": "concurrently '0serve -o demo/prosemirror.html' 'npm run watch'",
+    "postinstall": "./scripts/apply-patches.sh"
   },
   "exports": {
     ".": {
