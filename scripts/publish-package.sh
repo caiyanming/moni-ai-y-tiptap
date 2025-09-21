@@ -7,7 +7,7 @@ set -e
 
 # 配置
 REGISTRY_URL="http://registry.fufenxi.com:4873/"
-VERSION="3.0.0-beta.22.1"
+VERSION="3.0.0-beta.22.3"
 
 # 颜色输出
 RED='\033[0;31m'
