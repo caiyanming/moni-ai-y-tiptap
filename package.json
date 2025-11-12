@@ -15,9 +15,7 @@
     "watch": "rollup -wc",
     "debug": "concurrently '0serve -o test.html' 'npm run watch'",
     "preversion": "npm run lint && npm run dist && npm run test",
-    "publish": "npm run preversion && npm publish --access public",
-    "publish:local": "npm run preversion && npm publish --registry=http://registry.fufenxi.com:4873/ --access public",
-    "publish:pre": "npm run preversion && npm publish --access public --tag beta",
+    "publish": "npm run preversion && REGISTRY=${REGISTRY:-https://registry-zonbov-5xySne-raqbot.fufenxi.com} bash ./scripts/publish.sh",
     "start": "concurrently '0serve -o demo/prosemirror.html' 'npm run watch'",
     "postinstall": "./scripts/apply-patches.sh"
   },
